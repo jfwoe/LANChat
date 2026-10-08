@@ -1783,29 +1783,6 @@ fn get_notification_id(from_id: &str) -> i32 {
 
 #[tauri::command]
 pub fn show_notification(_app: tauri::AppHandle, title: String, body: String, #[allow(unused_variables)] from_id: String) {
-    #[cfg(windows)]
-    {
-        // Windows 使用 PowerShell（不依赖 Start Menu 注册）
-        let safe_title = title.replace('\'', "''");
-        let safe_body = body.replace('\'', "''");
-        let script = format!(
-            "Add-Type -AssemblyName System.Windows.Forms; \
-             $n = New-Object System.Windows.Forms.NotifyIcon; \
-             $n.Icon = [System.Drawing.SystemIcons]::Information; \
-             $n.Visible = $true; \
-             $n.ShowBalloonTip(5000, '{safe_title}', '{safe_body}', [System.Windows.Forms.ToolTipIcon]::None)"
-        );
-        let _ = std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                &script,
-            ])
-            .spawn();
-    }
-
     #[cfg(target_os = "linux")]
     {
         // Linux 用 notify-send
